@@ -1,0 +1,83 @@
+mql5
+// Harmonic Pattern Helper Engulfing Bar Test
+// Developer's Site: forexroboteasy.com
+// Developer: Forex Robot Easy Team
+
+// This code is a sample implementation of a trading robot that identifies and capitalizes on Engulfing Candle Patterns within a manually input price range in the Forex market.
+
+// Include necessary libraries and modules
+#include <Trade\Trade.mqh>
+
+// Define constants
+#define PRICE_RANGE 100        // Manually input price range for Engulfing Candle Patterns
+
+// Define global variables
+CTrade trade;                  // Trade object
+
+// Initialize the trading robot
+int OnInit()
+{
+   // Enable trading
+   trade.SetExpertMagicNumber(123456);
+   trade.SetDeviationInPoints(10);
+   trade.SetTypeFilling(ORDER_FILLING_RETURN);
+   trade.SetTypeTrade(ORDER_FILLING_FOK);
+   trade.SetTypeTime(ORDER_TIME_GTC);
+   trade.SetSlippage(3);
+
+   return(INIT_SUCCEEDED);
+}
+
+// Handle incoming ticks
+void OnTick()
+{
+   // Check for Engulfing Candle Patterns within the defined price range
+   if (IsEngulfingPattern()) {
+      ExecuteTrade();
+   }
+}
+
+// Check if there is an Engulfing Candle Pattern within the defined price range
+bool IsEngulfingPattern()
+{
+   double currentHigh = High[0];
+   double currentLow = Low[0];
+   double previousHigh = High[1];
+   double previousLow = Low[1];
+
+   double bullishRange = currentHigh - currentLow;
+   double bearishRange = previousHigh - previousLow;
+
+   // Check if the current candle is a bullish engulfing pattern
+   if (currentHigh > previousHigh && currentLow < previousLow && bullishRange > PRICE_RANGE) {
+      return true;
+   }
+
+   // Check if the current candle is a bearish engulfing pattern
+   if (currentHigh < previousHigh && currentLow > previousLow && bearishRange > PRICE_RANGE) {
+      return true;
+   }
+
+   return false;
+}
+
+// Execute a trade based on the identified Engulfing Candle Pattern
+void ExecuteTrade()
+{
+   double lotSize = 0.1;       // Define lot size for the trade
+   double stopLoss = 50;       // Define stop loss level for the trade
+   double takeProfit = 100;    // Define take profit level for the trade
+
+   // Open a trade based on the Engulfing Candle Pattern
+   trade.Buy(lotSize, Symbol(), 0, 0, stopLoss, takeProfit, 'Engulfing Candle Pattern', 0, 0, clrGreen);
+}
+
+// Handle program shutdown
+void OnDeinit(const int reason)
+{
+   // Close all open trades
+   trade.CloseAll();
+}
+
+// Additional functions and logic can be added below
+
